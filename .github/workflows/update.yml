@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download XML
-        run: curl -L "https://www.open-epg.com/files/italy3.xml" -o guida.xml
+        run: curl -L -A "Mozilla/5.0" "https://www.open-epg.com/files/italy3.xml" -o guida.xml
 
       - name: Commit changes
         run: |
