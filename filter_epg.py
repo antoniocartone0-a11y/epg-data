@@ -7,16 +7,24 @@ SOURCES = [f"https://www.open-epg.com/files/italy{i}.xml" for i in range(1, 9)]
 
 # Mappatura: "ID_SORGENTE_XML": "TUO_ID_M3U"
 MAPPING = {
-    "Rai 1 (ITA).it": "Rai 1.it", "Rai 2 (ITA).it": "Rai 2.it", "Rai 3 (ITA).it": "Rai 3.it",
-    "Rete 4 (ITA).it": "Rete 4.it", "Canale 5 (ITA).it": "Canale 5.it", "Italia 1 (ITA).it": "Italia 1.it",
-    "La 7.it": "LA7.it", "TV8.it": "TV8.it", "NOVE (ITA).it": "NOVE.it", "Cielo.it": "Cielo.it",
-    "Real Time.it": "Real Time.it", "Iris.it": "Iris.it", "Cine34.it": "Cine34.it",
-    "Rai 4.it": "Rai 4.it", "Rai Movie.it": "Rai Movie.it", "Twenty Seven.it": "Twenty Seven.it",
-    "Rai 5.it": "Rai 5.it", "La 5.it": "La 5.it", "Giallo.it": "Giallo.it", "DMAX.it": "DMAX.it",
-    "FOCUS.it": "FOCUS.it", "Discovery Channel.it": "Discovery Channel.it",
-    "HGTV - Home&Garden.it": "HGTV - Home&Garden.it", "Mediaset Extra.it": "Mediaset Extra.it",
-    "Italia 2.it": "Italia 2.it", "Canale 21.it": "Canale 21.it", "canale 20.it": "canale 20.it",
-    "SonyOne|Filmd'azione.it": "Sony One | Film d'azione", "SonyOne|Filmdivertenti.it": "Sony One | Film divertenti"
+    "Rai 1 (ITA).it": "Rai 1.it",
+    "Rai 2 (ITA).it": "Rai 2.it",
+    "Rai 3 (ITA).it": "Rai 3.it",
+    "Rete 4 (ITA).it": "Rete 4.it",
+    "Canale 5 (ITA).it": "Canale 5.it",
+    "Italia 1 (ITA).it": "Italia 1.it",
+    "La 7.it": "LA7.it",
+    "TV8 (ITA).it": "TV8.it",
+    "NOVE (ITA).it": "NOVE.it",
+    "Cielo (ITA).it": "Cielo.it",
+    "Real Time (ITA).it": "Real Time.it",
+    "Iris (ITA).it": "Iris.it",
+    "Cine34 (ITA).it": "Cine34.it",
+    "Rai 4 (ITA).it": "Rai 4.it",
+    "Rai Movie (ITA).it": "Rai Movie.it",
+    "20 Mediaset.it": "canale 20.it",
+    "SonyOne|Filmd'azione.it": "SonyOne|Filmd'azione.it",
+    "SonyOne|Filmdivertenti.it": "SonyOne|Filmdivertenti.it"
 }
 
 TIME_SHIFT = 1 
