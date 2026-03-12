@@ -11,11 +11,62 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download XML
+      - name: Download and Filter XML
         run: |
-          curl -L -v -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
+          curl -L -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
           -H "Referer: https://www.open-epg.com/" \
-          "https://www.open-epg.com/files/italy3.xml" -o guida.xml
+          "https://www.open-epg.com/files/italy3.xml" -o temp_guida.xml
+          
+          python3 -c '
+          import xml.etree.ElementTree as ET
+          
+          whitelist = [
+              "Rai 1.it", "Rai1.it", "Rai 1", "Rai1", "Rai.it",
+              "Rai 2.it", "Rai2.it", "Rai 2", "Rai2",
+              "Rai 3.it", "Rai3.it", "Rai 3", "Rai3",
+              "Rete 4.it", "Rete4.it", "Rete 4", "Rete4",
+              "Canale 5.it", "Canale5.it", "Canale 5", "Canale5",
+              "Italia 1.it", "Italia1.it", "Italia 1", "Italia1",
+              "La7.it", "LA7.it", "La 7.it", "La7",
+              "La7d.it", "LA7d.it", "La7 d.it", "La7 Cinema.it",
+              "TV8.it", "Tv8.it", "TV8", "Tv 8.it",
+              "Nove.it", "NOVE.it", "Nove",
+              "Cielo.it", "Cielo", "CIELO.it",
+              "Real Time.it", "RealTime.it", "Real Time",
+              "Iris.it", "Iris", "IRIS.it",
+              "Cine34.it", "Cine 34.it", "Cine34",
+              "Rai 4.it", "Rai4.it", "Rai 4",
+              "Rai Movie.it", "RaiMovie.it", "Rai Movie",
+              "Twenty Seven.it", "TwentySeven.it", "Twenty Seven", "TwentySeven",
+              "Rai 5.it", "Rai5.it", "Rai 5",
+              "La 5.it", "La5.it", "La 5",
+              "Giallo.it", "Giallo", "GIALLO.it",
+              "DMAX.it", "Dmax.it", "DMAX",
+              "Focus.it", "FOCUS.it", "Focus",
+              "DiscoveryChannel.it", "Discovery Channel.it", "Discovery Channel",
+              "HGTV - HomeandGarden.it", "HGTV.it", "HGTV", "HomeandGarden.it",
+              "Mediaset Extra.it", "MediasetExtra.it", "Mediaset Extra",
+              "Italia 2.it", "Italia2.it", "Italia 2"
+          ]
+          
+          try:
+              tree = ET.parse("temp_guida.xml")
+              root = tree.getroot()
+              new_root = ET.Element("tv", root.attrib)
+              
+              for channel in root.findall("channel"):
+                  if channel.get("id") in whitelist:
+                      new_root.append(channel)
+              
+              for programme in root.findall("programme"):
+                  if programme.get("channel") in whitelist:
+                      new_root.append(programme)
+              
+              new_tree = ET.ElementTree(new_root)
+              new_tree.write("guida.xml", encoding="UTF-8", xml_declaration=True)
+          except Exception as e:
+              print(f"Errore: {e}")
+          '
 
       - name: Commit changes
         run: |
