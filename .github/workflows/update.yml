@@ -13,41 +13,26 @@ jobs:
 
       - name: Download and Filter XML
         run: |
-          # Scarica il file originale
-          curl -L -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
-          -H "Referer: https://www.open-epg.com/" \
-          "https://www.open-epg.com/files/italy3.xml" -o temp_guida.xml
-          
-          # Esegue il filtraggio intelligente
+          curl -L -A "Mozilla/5.0" -H "Referer: https://www.open-epg.com/" "https://www.open-epg.com/files/italy3.xml" -o temp_guida.xml
           python3 -c '
           import xml.etree.ElementTree as ET
-          
-          keywords = ["Rai", "Mediaset", "Rete 4", "Canale 5", "Italia 1", "Italia 2", "La7", "Tv8", "Nove", "Cielo", "Iris", "DMAX", "Focus", "Giallo", "Cine34", "Real Time", "Twenty Seven", "TwentySeven", "Discovery", "HGTV"]
-          
+          keys = ["Rai", "Mediaset", "Rete 4", "Canale 5", "Italia 1", "Italia 2", "La7", "Tv8", "Nove", "Cielo", "Iris", "DMAX", "Focus", "Giallo", "Cine34", "Real Time", "Twenty Seven", "TwentySeven", "Discovery", "HGTV"]
           try:
               tree = ET.parse("temp_guida.xml")
               root = tree.getroot()
               new_root = ET.Element("tv", root.attrib)
-              
               matched_ids = []
-              # Trova i canali che contengono le parole chiave
               for channel in root.findall("channel"):
                   chid = channel.get("id")
-                  if chid and any(key.lower() in chid.lower() for key in keywords):
+                  if chid and any(k.lower() in chid.lower() for k in keys):
                       new_root.append(channel)
                       matched_ids.append(chid)
-              
-              # Prende solo i programmi di quei canali
-              for programme in root.findall("programme"):
-                  p_chid = programme.get("channel")
-                  if p_chid in matched_ids:
-                      new_root.append(programme)
-              
-              new_tree = ET.ElementTree(new_root)
-              new_tree.write("guida.xml", encoding="UTF-8", xml_declaration=True)
-              print(f"Filtraggio completato. Canali trovati: {len(matched_ids)}")
+              for prog in root.findall("programme"):
+                  if prog.get("channel") in matched_ids:
+                      new_root.append(prog)
+              ET.ElementTree(new_root).write("guida.xml", encoding="UTF-8", xml_declaration=True)
           except Exception as e:
-              print(f"Errore critico: {e}")
+              print(e)
           '
 
       - name: Commit changes
