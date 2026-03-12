@@ -5,15 +5,14 @@ try:
     root = tree.getroot()
     new_root = ET.Element("tv", root.attrib)
     matched_ids = []
-    for channel in root.findall("channel"):
-        chid = channel.get("id")
+    for ch in root.findall("channel"):
+        chid = ch.get("id")
         if chid and any(k.lower() in chid.lower() for k in keys):
-            new_root.append(channel)
+            new_root.append(ch)
             matched_ids.append(chid)
-    for prog in root.findall("programme"):
-        if prog.get("channel") in matched_ids:
-            new_root.append(prog)
+    for pg in root.findall("programme"):
+        if pg.get("channel") in matched_ids:
+            new_root.append(pg)
     ET.ElementTree(new_root).write("guida.xml", encoding="UTF-8", xml_declaration=True)
-    print("Successo")
 except Exception as e:
     print(e)
