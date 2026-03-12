@@ -3,24 +3,20 @@ on:
   schedule:
     - cron: '0 0,8,16 * * *'
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Download XML
+      - name: Download
         run: curl -L -A "Mozilla/5.0" -H "Referer: https://www.open-epg.com/" "https://www.open-epg.com/files/italy3.xml" -o temp_guida.xml
-
-      - name: Filter XML
+      - name: Filter
         run: python3 filter_epg.py
-
-      - name: Commit changes
+      - name: Push
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add guida.xml
-          git commit -m "Auto-update EPG" || exit 0
+          git commit -m "update" || exit 0
           git push
