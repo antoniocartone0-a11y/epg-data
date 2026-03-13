@@ -1,48 +1,25 @@
+import gzip
+import urllib.request
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
-import urllib.request
 
-# Usiamo solo italy3
-SOURCE = "https://www.open-epg.com/files/italy3.xml"
+# Configurazione
+SOURCE_URL = "https://epgshare01.online/epgshare01/epg_ripper_IT1.xml.gz"
+TIME_SHIFT = 1  # Ore da aggiungere
 
-# MAPPATURA: "ID_SORGENTE_XML" : "TUO_ID_M3U"
+# Mappatura: "ID_SORGENTE" : "ID_TUO_M3U"
 MAPPING = {
-    "Rai 1.it": "Rai 1.it",
-    "Rai 2.it": "Rai 2.it",
-    "Rai 3.it": "Rai 3.it",
-    "Rete 4.it": "Rete 4.it",
-    "Canale 5.it": "Canale 5.it",
-    "Italia 1.it": "Italia 1.it",
-    "LA7.it": "LA7.it",
-    "La7 Cinema.it": "La7 Cinema.it",
-    "TV8.it": "TV8.it",
-    "NOVE.it": "NOVE.it",
-    "Cielo.it": "Cielo.it",
-    "Real Time.it": "Real Time.it",
-    "Iris.it": "Iris.it",
-    "Cine34.it": "Cine34.it",
-    "Rai 4.it": "Rai 4.it",
-    "Rai Movie.it": "Rai Movie.it",
-    "Twenty Seven.it": "Twenty Seven.it",
-    "Rai 5.it": "Rai 5.it",
-    "La 5.it": "La 5.it",
-    "Giallo.it": "Giallo.it",
-    "DMAX.it": "DMAX.it",
-    "FOCUS.it": "FOCUS.it",
-    "Discovery Channel.it": "Discovery Channel.it",
-    "HGTV - Home&Garden.it": "HGTV - Home&Garden.it",
-    "Mediaset Extra.it": "Mediaset Extra.it",
-    "Italia 2.it": "Italia 2.it",
-    "Canale 21.it": "Canale 21.it",
-    "canale 20.it": "canale 20.it",
-    "SonyOne|Filmd'azione.it": "SonyOne|Filmd'azione.it",
-    "SonyOne|Filmdivertenti.it": "SonyOne|Filmdivertenti.it",
-    "SonyOne|Gliimperdibili.it": "SonyOne|Gliimperdibili.it",
-    "SonyOne|SerieThriller.it": "SonyOne|SerieThriller.it",
-    "SonyOne|SeriedaRidere.it": "SonyOne|SeriedaRidere.it"
+    "Rai.1.it": "Rai.1.it", "Rai.2.it": "Rai.2.it", "Rai.3.it": "Rai.3.it",
+    "Rete.4.it": "Rete.4.it", "Canale.5.it": "Canale.5.it", "Italia.1.it": "Italia.1.it",
+    "La7.it": "LA7.it", "La7d.it": "La7d.it", "Tv8.it": "TV8.it", "Nove.it": "NOVE.it",
+    "Cielo.it": "Cielo.it", "Real.Time.it": "Real Time.it", "Iris.it": "Iris.it",
+    "Cine34.it": "Cine34.it", "Rai.4.it": "Rai.4.it", "Rai.Movie.it": "Rai Movie.it",
+    "20.Mediaset.it": "canale 20.it", "TwentySeven.it": "Twenty Seven.it",
+    "Rai.5.it": "Rai 5.it", "La.5.it": "La 5.it", "Giallo.it": "Giallo.it",
+    "DMAX.it": "DMAX.it", "Focus.it": "FOCUS.it", "Discovery.Channel.it": "Discovery Channel.it",
+    "HGTV.it": "HGTV - Home&Garden.it", "Mediaset.Extra.it": "Mediaset Extra.it",
+    "Italia.2.it": "Italia 2.it", "Canale.21.it": "Canale 21.it"
 }
-
-TIME_SHIFT = 1 
 
 def fix_time(time_str):
     try:
@@ -52,37 +29,38 @@ def fix_time(time_str):
         return dt.strftime(fmt) + " " + parts[1]
     except: return time_str
 
-new_root = ET.Element("tv", {"generator-info-name": "EPG_Auto_Fix"})
-added_channels = set()
-
-try:
-    req = urllib.request.Request(SOURCE, headers={'User-Agent': 'Mozilla/5.0'})
-    with urllib.request.urlopen(req, timeout=15) as response:
-        tree = ET.parse(response)
+def main():
+    print("Scaricamento EPG...")
+    response = urllib.request.urlopen(SOURCE_URL)
+    with gzip.GzipFile(fileobj=response) as uncompressed:
+        tree = ET.parse(uncompressed)
         root = tree.getroot()
-        
-        # 1. Canali
-        for channel in root.findall("channel"):
-            orig_id = channel.get("id")
-            if orig_id in MAPPING:
-                new_ch = ET.SubElement(new_root, "channel", {"id": MAPPING[orig_id]})
-                dn = ET.SubElement(new_ch, "display-name")
-                dn.text = MAPPING[orig_id]
-                added_channels.add(MAPPING[orig_id])
-        
-        # 2. Programmi
-        for prog in root.findall("programme"):
-            orig_id = prog.get("channel")
-            if orig_id in MAPPING:
-                p_attrib = prog.attrib.copy()
-                p_attrib["channel"] = MAPPING[orig_id]
-                p_attrib["start"] = fix_time(p_attrib["start"])
-                p_attrib["stop"] = fix_time(p_attrib["stop"])
-                new_prog = ET.SubElement(new_root, "programme", p_attrib)
-                for child in prog:
-                    new_prog.append(child)
-except Exception as e:
-    print(f"Errore: {e}")
 
-ET.indent(new_root, space="  ", level=0)
-ET.ElementTree(new_root).write("guida.xml", encoding="UTF-8", xml_declaration=True)
+    new_root = ET.Element("tv", {"generator-info-name": "EPG_Optimizer"})
+    
+    # Filtro Canali
+    for channel in root.findall("channel"):
+        orig_id = channel.get("id")
+        if orig_id in MAPPING:
+            new_ch = ET.SubElement(new_root, "channel", {"id": MAPPING[orig_id]})
+            for child in channel:
+                new_root.find(f"channel[@id='{MAPPING[orig_id]}']").append(child)
+
+    # Filtro Programmi
+    for prog in root.findall("programme"):
+        orig_id = prog.get("channel")
+        if orig_id in MAPPING:
+            p_attrib = prog.attrib.copy()
+            p_attrib["channel"] = MAPPING[orig_id]
+            p_attrib["start"] = fix_time(p_attrib["start"])
+            p_attrib["stop"] = fix_time(p_attrib["stop"])
+            new_prog = ET.SubElement(new_root, "programme", p_attrib)
+            for child in prog:
+                new_prog.append(child)
+
+    ET.indent(new_root, space="  ", level=0)
+    ET.ElementTree(new_root).write("guida.xml", encoding="UTF-8", xml_declaration=True)
+    print("File guida.xml generato.")
+
+if __name__ == "__main__":
+    main()
