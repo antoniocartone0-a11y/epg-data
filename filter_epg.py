@@ -4,7 +4,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 
 # Sorgente professionale EPGShare01
-SOURCE_URL = "https://epgshare01.online/epgshare01/epg_ripper_IT1.xml.gz"
+SOURCE_URL = "https://iptv-epg.org/files/epg-it.xml"
 TIME_SHIFT = 1  # Aggiunge 1 ora per l'Italia
 
 # MAPPATURA PRECISA: "ID_SORGENTE" : "ID_DESTINAZIONE_M3U"
